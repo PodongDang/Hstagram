@@ -3,8 +3,11 @@ package SNS.Hstagram.service;
 import SNS.Hstagram.domain.User;
 import SNS.Hstagram.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpSession;
+import jakarta.websocket.Session;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.session.SessionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +45,7 @@ public class UserService {
     }
 
     // 이메일로 사용자 조회
-    public User findUserByEmail(String email) {
+    public Optional<User> findUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
@@ -90,4 +93,22 @@ public class UserService {
 
         userRepository.delete(user);
     }
+
+    public void login(String email, String password, HttpSession session) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        session.setAttribute("userId", user.getId());
+        session.setAttribute("username", user.getName());
+    }
+
+    public void logout(HttpSession session) {
+        session.invalidate();
+    }
+
+
 }
