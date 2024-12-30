@@ -1,3 +1,20 @@
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method  # API 정렬 방식
+    tagsSorter: alpha         # 태그 알파벳순 정렬
+  paths-to-match: /**         # 모든 엔드포인트 문서화
+  default-produces-media-type: application/json
+
+
+server:
+  servlet:
+    session:
+      cookie:
+        name: JSESSIONID
+
 spring:
   datasource:
     url: jdbc:h2:tcp://localhost/~/hstagram;
@@ -12,6 +29,19 @@ spring:
       hibernate:
         #        show_sql: true
         format_sql: true
+
+  data:
+   redis:
+     host: localhost
+     password: 1234
+     port: 6379
+
+  session:
+    store-type: redis
+    timeout: 30m  # 세션 만료 시간 (30분)
+    redis:
+      flush-mode: on_save
+      namespace: spring:session  # Redis에 저장되는 키의 prefix
 
 logging:
   level:
