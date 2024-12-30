@@ -40,6 +40,18 @@ public class CommentService {
         commentRepository.save(comment);
     }
 
+    // 댓글 업데이트 (내용 수정)
+    public void updateComment(Long commentId, String reply) {
+        Comment comment = commentRepository.findById(commentId);
+        if (comment == null) {
+            throw new EntityNotFoundException("댓글을 찾을 수 없습니다.");
+        }
+
+        comment.setReply(reply);
+        comment.setUpdatedAt(java.time.LocalDateTime.now());
+        commentRepository.save(comment);
+    }
+
     // 게시글의 모든 댓글 조회
     public List<Comment> getCommentsByPost(Long postId) {
         return commentRepository.findByPostId(postId);

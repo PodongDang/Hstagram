@@ -1,4 +1,4 @@
-package SNS.Hstagram;
+package SNS.Hstagram.config;
 
 import SNS.Hstagram.interceptor.AuthInterceptor;
 import org.springframework.context.annotation.Configuration;

@@ -29,6 +29,11 @@ public class AuthInterceptor implements HandlerInterceptor {
                              final HttpServletResponse response,
                              final Object handler) throws Exception {
 
+        // 로그인 및 회원가입 요청은 통과
+        if (request.getRequestURI().contains("/api/users/login") ||
+                request.getRequestURI().contains("/api/users/register")) {
+            return true;
+        }
         // 1. 쿠키에서 세션 ID 추출
         final String sessionIdByCookie = getSessionIdByCookie(request);
 

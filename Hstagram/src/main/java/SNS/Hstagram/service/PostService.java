@@ -32,6 +32,19 @@ public class PostService {
         postRepository.save(post);
     }
 
+    // 게시글 업데이트 (내용 및 이미지 수정)
+    public void updatePost(Long postId, String content, String imageUrl) {
+        Post post = postRepository.findById(postId);
+        if (post == null) {
+            throw new EntityNotFoundException("게시글을 찾을 수 없습니다.");
+        }
+
+        post.setContent(content);
+        post.setImageUrl(imageUrl);
+        post.setUpdatedAt(java.time.LocalDateTime.now());
+        postRepository.save(post);
+    }
+
     // 특정 사용자 게시글 조회
     public List<Post> getPostsByUser(Long userId) {
         return postRepository.findByUserId(userId);
