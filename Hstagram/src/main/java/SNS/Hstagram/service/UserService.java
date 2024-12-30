@@ -33,7 +33,7 @@ public class UserService {
 
     private void validateDuplicateMember(User user) {
         //EXCEPTION
-        List<User> findMembers = userRepository.findByName(user.getEmail());
+        Optional<User> findMembers = userRepository.findByEmail(user.getEmail());
         if (!findMembers.isEmpty()) {
             throw new IllegalStateException("email이 이미 존재하는 회원입니다.");
         }

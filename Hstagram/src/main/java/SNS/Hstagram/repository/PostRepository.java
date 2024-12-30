@@ -24,7 +24,7 @@ public class PostRepository {
     }
 
     // 사용자 ID로 게시글 조회 (특정 사용자의 게시글 목록)
-    public List<Post> findByUserId(Long userId) {
+    public List<Post> findAllByUserId(Long userId) {
         return em.createQuery("select p from Post p where p.user.id = :userId", Post.class)
                 .setParameter("userId", userId)
                 .getResultList();

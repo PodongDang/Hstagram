@@ -47,7 +47,7 @@ public class PostService {
 
     // 특정 사용자 게시글 조회
     public List<Post> getPostsByUser(Long userId) {
-        return postRepository.findByUserId(userId);
+        return postRepository.findAllByUserId(userId);
     }
 
     // 모든 게시글 조회 (최신순)
