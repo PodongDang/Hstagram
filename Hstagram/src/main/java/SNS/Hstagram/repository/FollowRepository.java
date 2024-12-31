@@ -2,6 +2,7 @@ package SNS.Hstagram.repository;
 
 import SNS.Hstagram.domain.Follow;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -22,12 +23,17 @@ public class FollowRepository {
 
     // 특정 팔로우 관계 조회 (follower → following)
     public Follow findByFollowerAndFollowing(Long followerId, Long followingId) {
-        return em.createQuery(
-                        "select f from Follow f where f.follower.id = :followerId and f.following.id = :followingId", Follow.class)
-                .setParameter("followerId", followerId)
-                .setParameter("followingId", followingId)
-                .getSingleResult();
+        try {
+            return em.createQuery(
+                            "select f from Follow f where f.follower.id = :followerId and f.following.id = :followingId", Follow.class)
+                    .setParameter("followerId", followerId)
+                    .setParameter("followingId", followingId)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;  // 결과가 없을 경우 null 반환
+        }
     }
+
 
     // 사용자의 팔로워 목록 조회
     public List<Follow> findFollowers(Long userId) {

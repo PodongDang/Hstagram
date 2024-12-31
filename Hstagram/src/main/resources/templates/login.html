@@ -1,0 +1,21 @@
+<!-- src/main/resources/templates/login.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>로그인</title>
+</head>
+<body>
+<h1>로그인</h1>
+<form th:action="@{/login}" method="post">
+    <div>
+        <label>Email: </label>
+        <input type="text" name="username" />  <!-- username 파라미터 -->
+    </div>
+    <div>
+        <label>Password: </label>
+        <input type="password" name="password" /> <!-- password 파라미터 -->
+    </div>
+    <button type="submit">로그인</button>
+</form>
+</body>
+</html>

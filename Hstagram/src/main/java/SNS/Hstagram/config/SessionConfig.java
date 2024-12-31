@@ -13,8 +13,8 @@ public class SessionConfig {
         DefaultCookieSerializer serializer = new DefaultCookieSerializer();
         serializer.setCookieName("JSESSIONID");
         serializer.setCookiePath("/");
-        serializer.setDomainNamePattern("^.+?(\\w+\\.[a-z]+)$");
-        serializer.setUseBase64Encoding(false);
+        serializer.setDomainNamePattern("^.+?(\\w+\\.[a-z]+)$"); // 서브 도메인에 세션 쿠키 공유
+        serializer.setUseBase64Encoding(true);
         return serializer;
     }
 }

@@ -103,7 +103,6 @@ public class UserService {
         }
 
         session.setAttribute("userId", user.getId());
-        session.setAttribute("username", user.getName());
     }
 
     public void logout(HttpSession session) {
