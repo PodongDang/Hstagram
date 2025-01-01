@@ -2,6 +2,7 @@ package SNS.Hstagram.service;
 
 import SNS.Hstagram.domain.Post;
 import SNS.Hstagram.domain.User;
+import SNS.Hstagram.dto.PostDTO;
 import SNS.Hstagram.repository.PostRepository;
 import SNS.Hstagram.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,6 +57,14 @@ public class PostService {
         return postRepository.findAllOrderedByCreatedAt();
     }
 
+    // 피드 조회
+    public List<PostDTO> findUserFeedList(Long userId) {
+        List<Post> posts = postRepository.findFeedPostsByUserId(userId);
+        return posts.stream()
+                .map(PostDTO::new)
+                .collect(Collectors.toList());
+    }
+
     // 게시글 삭제
     public void removePost(Long postId) {
         Post post = postRepository.findById(postId);
@@ -64,4 +74,5 @@ public class PostService {
             throw new EntityNotFoundException("Post not found");
         }
     }
+
 }

@@ -15,14 +15,13 @@ server:
 
 spring:
   datasource:
-    url: jdbc:h2:tcp://localhost/~/hstagram;
-    username: sa
-    password:
-      driver-class-name: org.h2.Driver
+    url: jdbc:mysql://localhost:3306/hstagram
+    username: root
+    password: 940627Ghkd!
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         #        show_sql: true

@@ -1,6 +1,7 @@
 package SNS.Hstagram.controller;
 
 import SNS.Hstagram.domain.Post;
+import SNS.Hstagram.dto.PostDTO;
 import SNS.Hstagram.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,6 +47,13 @@ public class PostController {
     @Operation(summary = "특정 사용자 게시글 조회", description = "특정 사용자가 작성한 게시글을 조회합니다.")
     public ResponseEntity<List<Post>> getPostsByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(postService.findUserPostsList(userId));
+    }
+
+    @GetMapping("/feed")
+    @Operation(summary = "피드 조회", description = "팔로우한 사용자의 게시글을 조회합니다.")
+    public ResponseEntity<List<PostDTO>> getFeedList(@RequestParam Long userId) {
+        List<PostDTO> feedPosts = postService.findUserFeedList(userId);
+        return ResponseEntity.ok(feedPosts);
     }
 
     @DeleteMapping("/{postId}")

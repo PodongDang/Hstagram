@@ -36,6 +36,18 @@ public class PostRepository {
                 .getResultList();
     }
 
+    // 피드 조회 - fetch join 사용
+    public List<Post> findFeedPostsByUserId(Long userId) {
+        return em.createQuery(
+                        "SELECT p FROM Post p " +
+                                "JOIN FETCH p.user u " +
+                                "WHERE u.id IN (" +
+                                "  SELECT f.following.id FROM Follow f WHERE f.follower.id = :userId" +
+                                ") ORDER BY p.createdAt DESC", Post.class)
+                .setParameter("userId", userId)
+                .getResultList();
+    }
+
     // 게시글 삭제
     public void delete(Post post) {
         em.remove(post);
