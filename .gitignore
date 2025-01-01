@@ -1,3 +1,4 @@
 
 Hstagram/src/main/resources/application.yml
 Hstagram/src/main/resources/application-aws.yml
+*.yml
