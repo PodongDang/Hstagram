@@ -23,7 +23,7 @@ public class PostController {
     public ResponseEntity<String> createPost(@RequestParam Long userId,
                                              @RequestParam String content,
                                              @RequestParam(required = false) String imageUrl) {
-        postService.createPost(userId, content, imageUrl);
+        postService.addPost(userId, content, imageUrl);
         return ResponseEntity.ok("게시글 작성 완료");
     }
 
@@ -32,26 +32,26 @@ public class PostController {
     public ResponseEntity<String> updatePost(@PathVariable Long postId,
                                              @RequestParam String content,
                                              @RequestParam(required = false) String imageUrl) {
-        postService.updatePost(postId, content, imageUrl);
+        postService.modifyPost(postId, content, imageUrl);
         return ResponseEntity.ok("게시글 수정 완료");
     }
 
     @GetMapping("/")
     @Operation(summary = "게시글 조회", description = "모든 게시글을 조회합니다.")
     public ResponseEntity<List<Post>> getAllPosts() {
-        return ResponseEntity.ok(postService.getAllPosts());
+        return ResponseEntity.ok(postService.findAllPostsList());
     }
 
     @GetMapping("/{userId}")
     @Operation(summary = "특정 사용자 게시글 조회", description = "특정 사용자가 작성한 게시글을 조회합니다.")
     public ResponseEntity<List<Post>> getPostsByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(postService.getPostsByUser(userId));
+        return ResponseEntity.ok(postService.findUserPostsList(userId));
     }
 
     @DeleteMapping("/{postId}")
     @Operation(summary = "게시글 삭제", description = "게시글을 삭제합니다.")
     public ResponseEntity<String> deletePost(@PathVariable Long postId) {
-        postService.deletePost(postId);
+        postService.removePost(postId);
         return ResponseEntity.ok("게시글 삭제 완료");
     }
 }

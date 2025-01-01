@@ -34,12 +34,12 @@ public class FollowController {
     @GetMapping("/{userId}/followers")
     @Operation(summary = "팔로워 조회", description = "특정 사용자의 팔로워 목록을 조회합니다.")
     public ResponseEntity<?> getFollowers(@PathVariable("userId") Long userId) {
-        return ResponseEntity.ok(followService.getFollowers(userId));
+        return ResponseEntity.ok(followService.followersList(userId));
     }
 
     @GetMapping("/{userId}/following")
     @Operation(summary = "팔로우 목록 조회", description = "특정 사용자가 팔로우하는 사용자 목록을 조회합니다.")
     public ResponseEntity<?> getFollowing(@PathVariable("userId") Long userId) {
-        return ResponseEntity.ok(followService.getFollowing(userId));
+        return ResponseEntity.ok(followService.followingList(userId));
     }
 }

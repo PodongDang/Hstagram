@@ -33,8 +33,8 @@ public class UserServiceTest {
         user.setPassword("password123");
 
         //when
-        userService.registerUser(user);
-        User savedUser = userService.getUserById(user.getId());
+        userService.addUser(user);
+        User savedUser = userService.findUserById(user.getId());
 
         //then
         assertEquals("유저 저장 완료", savedUser.getId(), user.getId());

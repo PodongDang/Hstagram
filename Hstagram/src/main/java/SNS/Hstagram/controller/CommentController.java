@@ -31,7 +31,7 @@ public class CommentController {
     @Operation(summary = "댓글 수정", description = "댓글의 내용을 수정합니다.")
     public ResponseEntity<String> updateComment(@PathVariable Long commentId,
                                                 @RequestParam String content) {
-        commentService.updateComment(commentId, content);
+        commentService.modifyComment(commentId, content);
         return ResponseEntity.ok("댓글 수정 완료");
     }
 
@@ -44,7 +44,7 @@ public class CommentController {
     @DeleteMapping("/{commentId}")
     @Operation(summary = "댓글 삭제", description = "댓글을 삭제합니다.")
     public ResponseEntity<String> deleteComment(@PathVariable Long commentId) {
-        commentService.deleteComment(commentId);
+        commentService.removeComment(commentId);
         return ResponseEntity.ok("댓글 삭제 완료");
     }
 }

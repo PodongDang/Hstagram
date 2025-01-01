@@ -51,12 +51,12 @@ public class FollowService {
     }
 
     // 팔로워 목록 조회
-    public List<Follow> getFollowers(Long userId) {
+    public List<Follow> followersList(Long userId) {
         return followRepository.findFollowers(userId);
     }
 
     // 팔로우 목록 조회
-    public List<Follow> getFollowing(Long userId) {
+    public List<Follow> followingList(Long userId) {
         return followRepository.findFollowing(userId);
     }
 }

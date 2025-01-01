@@ -41,7 +41,7 @@ public class CommentService {
     }
 
     // 댓글 업데이트 (내용 수정)
-    public void updateComment(Long commentId, String reply) {
+    public void modifyComment(Long commentId, String reply) {
         Comment comment = commentRepository.findById(commentId);
         if (comment == null) {
             throw new EntityNotFoundException("댓글을 찾을 수 없습니다.");
@@ -58,7 +58,7 @@ public class CommentService {
     }
 
     // 댓글 삭제
-    public void deleteComment(Long commentId) {
+    public void removeComment(Long commentId) {
         Comment comment = commentRepository.findById(commentId);
         if (comment != null) {
             commentRepository.delete(comment);

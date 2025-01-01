@@ -4,14 +4,11 @@ import SNS.Hstagram.domain.User;
 import SNS.Hstagram.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
-import jakarta.websocket.Session;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.session.SessionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,7 +20,7 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     //회원 가입
-    public void registerUser(User user) {
+    public void addUser(User user) {
         validateDuplicateMember(user);
 
         String encodedPassword = passwordEncoder.encode(user.getPassword());
@@ -40,7 +37,7 @@ public class UserService {
     }
 
     // 사용자 정보 조회 (ID 기준)
-    public User getUserById(Long id) {
+    public User findUserById(Long id) {
         return userRepository.findById(id);
     }
 
@@ -55,7 +52,7 @@ public class UserService {
     }
 
     // 사용자 정보 수정
-    public void updateUser(Long userId, String name, String email) {
+    public void modifyUser(Long userId, String name, String email) {
         User user = userRepository.findById(userId);
         if (user == null) {
             throw new EntityNotFoundException("User not found");
@@ -67,7 +64,7 @@ public class UserService {
     }
 
     // 비밀번호 변경
-    public void changePassword(Long userId, String oldPassword, String newPassword) {
+    public void modifyPassword(Long userId, String oldPassword, String newPassword) {
         User user = userRepository.findById(userId);
 
         if (user == null) {
@@ -85,7 +82,7 @@ public class UserService {
     }
 
     // 사용자 삭제
-    public void deleteUser(Long userId) {
+    public void removeUser(Long userId) {
         User user = userRepository.findById(userId);
         if (user == null) {
             throw new EntityNotFoundException("User not found");

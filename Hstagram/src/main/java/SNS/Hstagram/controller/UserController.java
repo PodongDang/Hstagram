@@ -22,7 +22,7 @@ public class UserController {
     @PostMapping("/register")
     @Operation(summary = "회원가입", description = "새로운 사용자를 등록합니다.")
     public ResponseEntity<String> register(@RequestBody User user) {
-        userService.registerUser(user);
+        userService.addUser(user);
         return ResponseEntity.ok("회원가입 완료");
     }
 
@@ -46,14 +46,14 @@ public class UserController {
     @GetMapping("/{id}")
     @Operation(summary = "사용자 조회", description = "ID를 기준으로 사용자 정보를 조회합니다.")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        User user = userService.getUserById(id);
+        User user = userService.findUserById(id);
         return ResponseEntity.ok(user);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "사용자 삭제", description = "ID를 기준으로 사용자 정보를 삭제합니다.")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+        userService.removeUser(id);
         return ResponseEntity.ok("사용자 삭제 완료");
     }
 }

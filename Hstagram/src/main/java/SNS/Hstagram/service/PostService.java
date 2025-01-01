@@ -20,7 +20,7 @@ public class PostService {
     private final UserRepository userRepository;
 
     // 게시글 작성
-    public void createPost(Long userId, String content, String imageUrl) {
+    public void addPost(Long userId, String content, String imageUrl) {
         User user = userRepository.findById(userId);
         if (user == null) {
             throw new EntityNotFoundException("User not found");
@@ -33,7 +33,7 @@ public class PostService {
     }
 
     // 게시글 업데이트 (내용 및 이미지 수정)
-    public void updatePost(Long postId, String content, String imageUrl) {
+    public void modifyPost(Long postId, String content, String imageUrl) {
         Post post = postRepository.findById(postId);
         if (post == null) {
             throw new EntityNotFoundException("게시글을 찾을 수 없습니다.");
@@ -46,17 +46,17 @@ public class PostService {
     }
 
     // 특정 사용자 게시글 조회
-    public List<Post> getPostsByUser(Long userId) {
+    public List<Post> findUserPostsList(Long userId) {
         return postRepository.findAllByUserId(userId);
     }
 
     // 모든 게시글 조회 (최신순)
-    public List<Post> getAllPosts() {
+    public List<Post> findAllPostsList() {
         return postRepository.findAllOrderedByCreatedAt();
     }
 
     // 게시글 삭제
-    public void deletePost(Long postId) {
+    public void removePost(Long postId) {
         Post post = postRepository.findById(postId);
         if (post != null) {
             postRepository.delete(post);
