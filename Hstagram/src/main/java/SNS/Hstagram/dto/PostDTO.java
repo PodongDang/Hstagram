@@ -9,11 +9,13 @@ import java.time.LocalDateTime;
 public class PostDTO {
     private Long id;
     private String content;
+    private String imageUrl;
     private LocalDateTime createdAt;
 
     public PostDTO(Post post) {
         this.id = post.getId();
         this.content = post.getContent();
+        this.imageUrl = post.getImageUrl();
         this.createdAt = post.getCreatedAt();
     }
 }

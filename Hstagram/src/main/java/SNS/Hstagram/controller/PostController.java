@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,12 +21,12 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping("/")
-    @Operation(summary = "게시글 작성", description = "새로운 게시글을 작성합니다.")
-    public ResponseEntity<String> createPost(@RequestParam Long userId,
-                                             @RequestParam String content,
-                                             @RequestParam(required = false) String imageUrl) {
-        postService.addPost(userId, content, imageUrl);
-        return ResponseEntity.ok("게시글 작성 완료");
+    @Operation(summary = "게시글 작성 및 이미지 업로드", description = "이미지와 함께 게시글을 작성합니다.")
+    public ResponseEntity<String> createPostWithImage(@RequestParam Long userId,
+                                                      @RequestParam String content,
+                                                      @RequestParam(required = false) MultipartFile image) {
+        postService.addPost(userId, content, image);
+        return ResponseEntity.ok("게시글 작성 및 이미지 업로드 완료");
     }
 
     @PutMapping("/{postId}")

@@ -9,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,13 +21,20 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final S3Uploader s3Uploader;
 
     // 게시글 작성
-    public void addPost(Long userId, String content, String imageUrl) {
+    public void addPost(Long userId, String content, MultipartFile image) {
         User user = userRepository.findById(userId);
         if (user == null) {
             throw new EntityNotFoundException("User not found");
         }
+
+        String imageUrl = null;
+        if (image != null && !image.isEmpty()) {
+            imageUrl = s3Uploader.uploadFile(image);
+        }
+
         Post post = new Post();
         post.setUser(user);
         post.setContent(content);
