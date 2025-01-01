@@ -6,7 +6,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@EnableCaching
+//@EnableCaching
 //@ComponentScan(basePackages = "SNS.Hstagram.controller")
 public class HstagramApplication {
 
