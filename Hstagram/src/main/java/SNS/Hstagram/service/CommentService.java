@@ -21,20 +21,15 @@ public class CommentService {
 
     // 댓글 작성
     public void addComment(Long postId, String reply, Long parentCommentId) {
-        Post post = postRepository.findById(postId);
-        if (post == null) {
-            throw new EntityNotFoundException("Post not found");
-        }
+        Post post = postRepository.findById(postId).orElseThrow(() -> new EntityNotFoundException("Post not found"));
 
         Comment comment = new Comment();
         comment.setPost(post);
         comment.setReply(reply);
 
         if (parentCommentId != null) {
-            Comment parentComment = commentRepository.findById(parentCommentId);
-            if (parentComment == null) {
-                throw new EntityNotFoundException("Parent comment not found");
-            }
+            Comment parentComment = commentRepository.findById(parentCommentId)
+                    .orElseThrow(() -> new EntityNotFoundException("Parent comment not found"));
             comment.setParentComment(parentComment);
         }
         commentRepository.save(comment);
@@ -42,10 +37,8 @@ public class CommentService {
 
     // 댓글 업데이트 (내용 수정)
     public void modifyComment(Long commentId, String reply) {
-        Comment comment = commentRepository.findById(commentId);
-        if (comment == null) {
-            throw new EntityNotFoundException("댓글을 찾을 수 없습니다.");
-        }
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException("댓글을 찾을 수 없습니다."));
 
         comment.setReply(reply);
         comment.setUpdatedAt(java.time.LocalDateTime.now());
@@ -59,12 +52,9 @@ public class CommentService {
 
     // 댓글 삭제
     public void removeComment(Long commentId) {
-        Comment comment = commentRepository.findById(commentId);
-        if (comment != null) {
-            commentRepository.delete(comment);
-        } else {
-            throw new EntityNotFoundException("Comment not found");
-        }
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
+        commentRepository.delete(comment);
     }
 
     // 대댓글 조회

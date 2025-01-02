@@ -29,16 +29,16 @@ public class UserService {
     }
 
     private void validateDuplicateMember(User user) {
-        //EXCEPTION
-        Optional<User> findMembers = userRepository.findByEmail(user.getEmail());
-        if (!findMembers.isEmpty()) {
+        Optional<User> findMember = userRepository.findByEmail(user.getEmail());
+        if (findMember.isPresent()) {
             throw new IllegalStateException("email이 이미 존재하는 회원입니다.");
         }
     }
 
     // 사용자 정보 조회 (ID 기준)
     public User findUserById(Long id) {
-        return userRepository.findById(id);
+        return userRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
     // 이메일로 사용자 조회
@@ -53,10 +53,8 @@ public class UserService {
 
     // 사용자 정보 수정
     public void modifyUser(Long userId, String name, String email) {
-        User user = userRepository.findById(userId);
-        if (user == null) {
-            throw new EntityNotFoundException("User not found");
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         user.setName(name);
         user.setEmail(email);
@@ -65,11 +63,8 @@ public class UserService {
 
     // 비밀번호 변경
     public void modifyPassword(Long userId, String oldPassword, String newPassword) {
-        User user = userRepository.findById(userId);
-
-        if (user == null) {
-            throw new EntityNotFoundException("User not found");
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         // 현재 비밀번호 확인
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
@@ -83,10 +78,8 @@ public class UserService {
 
     // 사용자 삭제
     public void removeUser(Long userId) {
-        User user = userRepository.findById(userId);
-        if (user == null) {
-            throw new EntityNotFoundException("User not found");
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         userRepository.delete(user);
     }
@@ -105,6 +98,4 @@ public class UserService {
     public void logout(HttpSession session) {
         session.invalidate();
     }
-
-
 }

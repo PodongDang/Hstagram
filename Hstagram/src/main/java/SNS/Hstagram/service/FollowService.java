@@ -21,33 +21,27 @@ public class FollowService {
 
     // 팔로우 요청
     public void followUser(Long followerId, Long followingId) {
-        User follower = userRepository.findById(followerId);
-        User following = userRepository.findById(followingId);
-
-        if (follower == null || following == null) {
-            throw new EntityNotFoundException("User not found");
-        }
+        User follower = userRepository.findById(followerId)
+                .orElseThrow(() -> new EntityNotFoundException("Follower not found"));
+        User following = userRepository.findById(followingId)
+                .orElseThrow(() -> new EntityNotFoundException("Following user not found"));
 
         // 중복 팔로우 방지
-        if (followRepository.findByFollowerAndFollowing(followerId, followingId) == null) {
-            Follow follow = new Follow();
-            follow.setFollower(follower);
-            follow.setFollowing(following);
-            follow.setStatus("PENDING");
-            followRepository.save(follow);
-        } else {
-            throw new IllegalStateException("Already following this user");
-        }
+        followRepository.findByFollowerAndFollowing(followerId, followingId)
+                .ifPresent(f -> { throw new IllegalStateException("Already following this user"); });
+
+        Follow follow = new Follow();
+        follow.setFollower(follower);
+        follow.setFollowing(following);
+        follow.setStatus("PENDING");
+        followRepository.save(follow);
     }
 
     // 언팔로우
     public void unfollowUser(Long followerId, Long followingId) {
-        Follow follow = followRepository.findByFollowerAndFollowing(followerId, followingId);
-        if (follow != null) {
-            followRepository.delete(follow);
-        } else {
-            throw new EntityNotFoundException("Follow relationship not found");
-        }
+        Follow follow = followRepository.findByFollowerAndFollowing(followerId, followingId)
+                .orElseThrow(() -> new EntityNotFoundException("Follow relationship not found"));
+        followRepository.delete(follow);
     }
 
     // 팔로워 목록 조회

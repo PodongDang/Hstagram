@@ -1,56 +1,31 @@
 package SNS.Hstagram.repository;
 
 import SNS.Hstagram.domain.Post;
-import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-@RequiredArgsConstructor
-public class PostRepository {
-
-    private final EntityManager em;
-
-    // 게시글 저장
-    public void save(Post post) {
-        em.persist(post);
-    }
-
-    // ID로 게시글 조회
-    public Post findById(Long id) {
-        return em.find(Post.class, id);
-    }
+public interface PostRepository extends JpaRepository<Post, Long> {
 
     // 사용자 ID로 게시글 조회 (특정 사용자의 게시글 목록)
-    public List<Post> findAllByUserId(Long userId) {
-        return em.createQuery("select p from Post p where p.user.id = :userId", Post.class)
-                .setParameter("userId", userId)
-                .getResultList();
-    }
+    @Query("SELECT p FROM Post p WHERE p.user.id = :userId")
+    List<Post> findAllByUserId(@Param("userId") Long userId);
 
     // 최신 게시글 조회 (시간순 정렬)
-    public List<Post> findAllOrderedByCreatedAt() {
-        return em.createQuery("select p from Post p order by p.createdAt desc", Post.class)
-                .getResultList();
-    }
+    @Query("SELECT p FROM Post p ORDER BY p.createdAt DESC")
+    List<Post> findAllOrderedByCreatedAt();
 
     // 피드 조회 - fetch join 사용
-    public List<Post> findFeedPostsByUserId(Long userId) {
-        return em.createQuery(
-                        "SELECT p FROM Post p " +
-                                "JOIN FETCH p.user u " +
-                                "WHERE u.id IN (" +
-                                "  SELECT f.following.id FROM Follow f WHERE f.follower.id = :userId" +
-                                ") ORDER BY p.createdAt DESC", Post.class)
-                .setParameter("userId", userId)
-                .getResultList();
-    }
-
-    // 게시글 삭제
-    public void delete(Post post) {
-        em.remove(post);
-    }
-
+    @Query(
+            "SELECT p FROM Post p " +
+                    "JOIN FETCH p.user u " +
+                    "WHERE u.id IN (" +
+                    "  SELECT f.following.id FROM Follow f WHERE f.follower.id = :userId" +
+                    ") ORDER BY p.createdAt DESC"
+    )
+    List<Post> findFeedPostsByUserId(@Param("userId") Long userId);
 }

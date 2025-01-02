@@ -25,10 +25,8 @@ public class PostService {
 
     // 게시글 작성
     public void addPost(Long userId, String content, MultipartFile image) {
-        User user = userRepository.findById(userId);
-        if (user == null) {
-            throw new EntityNotFoundException("User not found");
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         String imageUrl = null;
         if (image != null && !image.isEmpty()) {
@@ -44,10 +42,8 @@ public class PostService {
 
     // 게시글 업데이트 (내용 및 이미지 수정)
     public void modifyPost(Long postId, String content, String imageUrl) {
-        Post post = postRepository.findById(postId);
-        if (post == null) {
-            throw new EntityNotFoundException("게시글을 찾을 수 없습니다.");
-        }
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다."));
 
         post.setContent(content);
         post.setImageUrl(imageUrl);
@@ -69,18 +65,14 @@ public class PostService {
     public List<PostDTO> findUserFeedList(Long userId) {
         List<Post> posts = postRepository.findFeedPostsByUserId(userId);
         return posts.stream()
-                .map(PostDTO::new)
+                .map(PostDTO::from)
                 .collect(Collectors.toList());
     }
 
     // 게시글 삭제
     public void removePost(Long postId) {
-        Post post = postRepository.findById(postId);
-        if (post != null) {
-            postRepository.delete(post);
-        } else {
-            throw new EntityNotFoundException("Post not found");
-        }
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("Post not found"));
+        postRepository.delete(post);
     }
-
 }
