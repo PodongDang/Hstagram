@@ -1,9 +1,11 @@
 package SNS.Hstagram.controller;
 
 import SNS.Hstagram.domain.User;
+import SNS.Hstagram.dto.UserDTO;
 import SNS.Hstagram.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +30,14 @@ public class UserController {
 
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인합니다.")
-    public ResponseEntity<String> login(@RequestBody Map<String, String> loginRequest, HttpSession session) {
+    public ResponseEntity<String> login(@RequestBody Map<String, String> loginRequest, final HttpServletRequest httpRequest) {
         String email = loginRequest.get("email");
         String password = loginRequest.get("password");
+        final Long userId = userService.login(email, password);
+        // == 로그인 성공하면 세션 생성 == //
+        final HttpSession session = httpRequest.getSession();
+        session.setAttribute("userId", userId);
 
-        userService.login(email, password, session);
         return ResponseEntity.ok("로그인 성공");
     }
 
@@ -45,10 +50,11 @@ public class UserController {
 
     @GetMapping("/{id}")
     @Operation(summary = "사용자 조회", description = "ID를 기준으로 사용자 정보를 조회합니다.")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        User user = userService.findUserById(id);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+        UserDTO userDTO = userService.findUserById(id);
+        return ResponseEntity.ok(userDTO);
     }
+
 
     @DeleteMapping("/{id}")
     @Operation(summary = "사용자 삭제", description = "ID를 기준으로 사용자 정보를 삭제합니다.")
