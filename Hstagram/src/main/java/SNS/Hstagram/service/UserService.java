@@ -1,6 +1,7 @@
 package SNS.Hstagram.service;
 
 import SNS.Hstagram.domain.User;
+import SNS.Hstagram.dto.UserDTO;
 import SNS.Hstagram.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
@@ -36,10 +37,12 @@ public class UserService {
     }
 
     // 사용자 정보 조회 (ID 기준)
-    public User findUserById(Long id) {
-        return userRepository.findById(id)
+    public UserDTO findUserById(Long id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        return UserDTO.from(user);
     }
+
 
     // 이메일로 사용자 조회
     public Optional<User> findUserByEmail(String email) {
@@ -84,7 +87,7 @@ public class UserService {
         userRepository.delete(user);
     }
 
-    public void login(String email, String password, HttpSession session) {
+    public Long login(String email, String password) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
 
@@ -92,7 +95,7 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        session.setAttribute("userId", user.getId());
+        return user.getId();
     }
 
     public void logout(HttpSession session) {
