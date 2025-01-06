@@ -1,6 +1,7 @@
 package SNS.Hstagram.repository;
 
 import SNS.Hstagram.domain.Post;
+import SNS.Hstagram.dto.PostDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,8 +13,8 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     // 사용자 ID로 게시글 조회 (특정 사용자의 게시글 목록)
-    @Query("SELECT p FROM Post p WHERE p.user.id = :userId")
-    List<Post> findAllByUserId(@Param("userId") Long userId);
+    @Query("SELECT p FROM Post p JOIN FETCH p.user u WHERE u.id = :userId")
+    List<PostDTO> findAllByUserId(@Param("userId") Long userId);
 
     // 최신 게시글 조회 (시간순 정렬)
     @Query("SELECT p FROM Post p ORDER BY p.createdAt DESC")
