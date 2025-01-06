@@ -8,6 +8,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Configuration
 @PropertySource("classpath:application-aws.yml")  // AWS 설정 파일 명시적 로드
@@ -23,8 +24,8 @@ public class S3Config {
     private String secretKey;
 
     @Bean
-    public S3Client s3Client() {
-        return S3Client.builder()
+    public S3Presigner s3Presigner() {
+        return S3Presigner.builder()
                 .region(Region.of(region))  // 리전 설정
                 .credentialsProvider(StaticCredentialsProvider.create(
                         AwsBasicCredentials.create(accessKey, secretKey)
