@@ -1,10 +1,12 @@
 package SNS.Hstagram.config;
 
+import SNS.Hstagram.dto.PostDTO;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
@@ -25,14 +27,15 @@ public class RedisConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // key Serializer (주로 문자열)
+        // Key Serializer
         template.setKeySerializer(new StringRedisSerializer());
-        // value Serializer (JSON 직렬화)
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
 
-        // 해시 키/값 Serializer
+        // Value Serializer (PostDTO 타입 유지)
+        Jackson2JsonRedisSerializer<PostDTO> serializer = new Jackson2JsonRedisSerializer<>(PostDTO.class);
+        template.setValueSerializer(serializer);
+
         template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setHashValueSerializer(serializer);
 
         template.afterPropertiesSet();
         return template;

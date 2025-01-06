@@ -9,15 +9,15 @@ import java.time.LocalDateTime;
 public record PostDTO (
     Long id,
     String content,
-    String imageUrl,
-    LocalDateTime createdAt
+    String imageUrl
+    //LocalDateTime createdAt
 ){
     public static PostDTO from(Post post) {
         return PostDTO.builder()
                 .id(post.getId())
                 .content(post.getContent())
                 .imageUrl(post.getImageUrl())
-                .createdAt(post.getCreatedAt())
+                //.createdAt(post.getCreatedAt())
                 .build();
     }
 }
