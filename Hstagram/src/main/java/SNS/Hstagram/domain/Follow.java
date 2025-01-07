@@ -1,7 +1,9 @@
 package SNS.Hstagram.domain;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -9,19 +11,21 @@ import java.util.Objects;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "follow")
 public class Follow {
 
-    @Id @GeneratedValue
-    @Column(name = "follow_id")
-    private Long id;
+    @EmbeddedId
+    private FollowId id;
 
-    // 팔로우 하는 사용자
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("followerId")  // FollowId의 followerId에 매핑
     @JoinColumn(name = "follower_id", nullable = false)
     private User follower;
 
-    // 팔로우 받는 사용자
     @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("followingId")  // FollowId의 followingId에 매핑
     @JoinColumn(name = "following_id", nullable = false)
     private User following;
 
