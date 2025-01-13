@@ -30,6 +30,7 @@ public class PostService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisTemplate<String, String> postTemplate;
     private final S3Uploader s3Uploader;
+    private final SQSService sqsService;
 
     // 게시글 작성
     /**
@@ -63,18 +64,23 @@ public class PostService {
         postRepository.save(post);
 
         // Post -> PostDTO로 변환
-        PostDTO postDTO = PostDTO.from(post);
+//        PostDTO postDTO = PostDTO.from(post);
 
         // 1. 게시글을 Redis에 캐싱 (key: post:{postId})
-        String postKey = "post:" + post.getId();
-        redisTemplate.opsForValue().set(postKey, postDTO, Duration.ofDays(30)); //redis에는 30일동안 유지
+//        String postKey = "post:" + post.getId();
+//        redisTemplate.opsForValue().set(postKey, postDTO, Duration.ofDays(30)); //redis에는 30일동안 유지
 
         // 2. 팔로워 피드에 postId 푸시
-        List<Follow> followers = followRepository.findFollowers(userId);
-        for (Follow follow : followers) {
-            String feedKey = "feed:" + follow.getFollower().getId();
-            redisTemplate.opsForList().leftPush(feedKey, post.getId());
-        }
+//        List<Follow> followers = followRepository.findFollowers(userId);
+//        for (Follow follow : followers) {
+//            String feedKey = "feed:" + follow.getFollower().getId();
+//            redisTemplate.opsForList().leftPush(feedKey, post.getId());
+//        }
+        // SQS 메시지 전송
+        String message = String.format("{\"postId\":%d,\"userId\":%d}", post.getId(), userId);
+        sqsService.sendMessage("hstagramSqs", message);
+
+        System.out.println("SQS message sent for postId: " + post.getId());
     }
 
     // 게시글 업데이트 (내용 및 이미지 수정)

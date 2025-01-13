@@ -12,6 +12,8 @@ build/
 application.yml
 application-aws.yml
 
+.env
+
 ### STS ###
 .apt_generated
 .classpath
