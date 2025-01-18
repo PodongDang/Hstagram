@@ -1,20 +1,23 @@
 package SNS.Hstagram.service;
 
-import SNS.Hstagram.domain.Follow;
 import SNS.Hstagram.domain.Post;
+import SNS.Hstagram.domain.PostDocument;
 import SNS.Hstagram.domain.User;
 import SNS.Hstagram.dto.PostDTO;
+import SNS.Hstagram.repository.ElasticRepository;
 import SNS.Hstagram.repository.FollowRepository;
 import SNS.Hstagram.repository.PostRepository;
 import SNS.Hstagram.repository.UserRepository;
+import SNS.Hstagram.service.SQS.SQSService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,6 +29,7 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final ElasticRepository elasticRepository;
     private final FollowRepository followRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisTemplate<String, String> postTemplate;
@@ -63,25 +67,27 @@ public class PostService {
 
         postRepository.save(post);
 
-        // Post -> PostDTO로 변환
-//        PostDTO postDTO = PostDTO.from(post);
+        // Elasticsearch에 저장
+        PostDocument postDocument = new PostDocument();
+        postDocument.setId(post.getId());
+        postDocument.setUserId(userId);
+        postDocument.setContent(post.getContent());
+        postDocument.setImageUrl(post.getImageUrl());
+        postDocument.setLikeCount(post.getLikeCount());
+        postDocument.setCommentCount(post.getCommentCount());
+        postDocument.setPrivate(post.isPrivate());
+        postDocument.setCreatedAt(OffsetDateTime.now()); // Convert to UTC Instant
+        postDocument.setUpdatedAt(OffsetDateTime.now()); // Convert to UTC Instant
 
-        // 1. 게시글을 Redis에 캐싱 (key: post:{postId})
-//        String postKey = "post:" + post.getId();
-//        redisTemplate.opsForValue().set(postKey, postDTO, Duration.ofDays(30)); //redis에는 30일동안 유지
+        elasticRepository.save(postDocument);
 
-        // 2. 팔로워 피드에 postId 푸시
-//        List<Follow> followers = followRepository.findFollowers(userId);
-//        for (Follow follow : followers) {
-//            String feedKey = "feed:" + follow.getFollower().getId();
-//            redisTemplate.opsForList().leftPush(feedKey, post.getId());
-//        }
         // SQS 메시지 전송
         String message = String.format("{\"postId\":%d,\"userId\":%d}", post.getId(), userId);
         sqsService.sendMessage("hstagramSqs", message);
 
         System.out.println("SQS message sent for postId: " + post.getId());
     }
+
 
     // 게시글 업데이트 (내용 및 이미지 수정)
     public void modifyPost(Long postId, String content, String imageUrl) {
@@ -92,6 +98,17 @@ public class PostService {
         post.setImageUrl(imageUrl);
         post.setUpdatedAt(java.time.LocalDateTime.now());
         postRepository.save(post);
+
+        // Elasticsearch에서 문서 검색 및 업데이트
+        PostDocument postDocument = elasticRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("Elasticsearch에서 문서를 찾을 수 없습니다."));
+
+        postDocument.setContent(content);
+        postDocument.setImageUrl(imageUrl);
+        postDocument.setUpdatedAt(OffsetDateTime.now());
+        elasticRepository.save(postDocument);
+
+        System.out.println("Elasticsearch document updated for postId: " + postId);
     }
 
     // 특정 사용자 게시글 조회
@@ -144,5 +161,10 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("Post not found"));
         postRepository.delete(post);
+    }
+
+    // Elastic Search 기능 추가
+    public List<PostDocument> searchPostsByKeyword(String keyword) {
+        return elasticRepository.findByContentContaining(keyword);
     }
 }

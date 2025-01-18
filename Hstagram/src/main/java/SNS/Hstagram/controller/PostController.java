@@ -1,6 +1,7 @@
 package SNS.Hstagram.controller;
 
 import SNS.Hstagram.domain.Post;
+import SNS.Hstagram.domain.PostDocument;
 import SNS.Hstagram.dto.PostDTO;
 import SNS.Hstagram.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -86,10 +87,17 @@ public class PostController {
         return ResponseEntity.ok(feedPosts);
     }
 
+    @GetMapping("/search")
+    @Operation(summary = "게시물 검색", description = "keyword에 근접한 게시글을 조회합니다.")
+    public List<PostDocument> searchPosts(@RequestParam String keyword) {
+        return postService.searchPostsByKeyword(keyword);
+    }
+
     @DeleteMapping("/{postId}")
     @Operation(summary = "게시글 삭제", description = "게시글을 삭제합니다.")
     public ResponseEntity<String> deletePost(@PathVariable Long postId) {
         postService.removePost(postId);
         return ResponseEntity.ok("게시글 삭제 완료");
     }
+
 }

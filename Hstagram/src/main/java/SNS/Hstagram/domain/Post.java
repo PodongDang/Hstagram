@@ -30,6 +30,7 @@ public class Post {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
+
     @Column(name = "like_count", nullable = false)
     private int likeCount = 0;
 
