@@ -1,4 +1,4 @@
-package SNS.Hstagram.service;
+package SNS.Hstagram.service.SQS;
 
 import SNS.Hstagram.domain.Follow;
 import SNS.Hstagram.dto.SqsDTO;

@@ -1,4 +1,4 @@
-package SNS.Hstagram.service;
+package SNS.Hstagram.service.SQS;
 
 import io.awspring.cloud.sqs.operations.SendResult;
 import io.awspring.cloud.sqs.operations.SqsTemplate;
