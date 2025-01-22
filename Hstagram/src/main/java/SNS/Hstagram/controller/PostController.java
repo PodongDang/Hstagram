@@ -93,6 +93,18 @@ public class PostController {
         return postService.searchPostsByKeyword(keyword);
     }
 
+    /**
+     * MySQL Full-Text Search 기반 게시물 검색 API
+     *
+     * @param keyword 검색 키워드
+     * @return 키워드에 근접한 게시물 목록
+     */
+    @GetMapping("/fulltext")
+    @Operation(summary = "MySQL 게시물 검색", description = "MySQL Full-Text Search를 사용하여 keyword에 근접한 게시글을 조회합니다.")
+    public List<PostDTO> searchPostsByFulltext(@RequestParam String keyword) {
+        return postService.searchPostsByFulltext(keyword);
+    }
+
     @DeleteMapping("/{postId}")
     @Operation(summary = "게시글 삭제", description = "게시글을 삭제합니다.")
     public ResponseEntity<String> deletePost(@PathVariable Long postId) {
