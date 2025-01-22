@@ -36,6 +36,8 @@ public class PostService {
     private final S3Uploader s3Uploader;
     private final SQSService sqsService;
 
+    private static final int FOLLOWER_THRESHOLD = 10; // 팔로워 수 기준
+
     // 게시글 작성
     /**
      * (1) Presigned URL 발급 메서드
@@ -81,12 +83,17 @@ public class PostService {
 
         elasticRepository.save(postDocument);
 
-        // SQS 메시지 전송
-        String message = String.format("{\"postId\":%d,\"userId\":%d}", post.getId(), userId);
-        sqsService.sendMessage("hstagramSqs", message);
-
-        System.out.println("SQS message sent for postId: " + post.getId());
+        // 팔로워 수 검사
+        if (followRepository.countFollowers(user) <= FOLLOWER_THRESHOLD) {
+            // SQS 메시지 전송
+            String message = String.format("{\"postId\":%d,\"userId\":%d}", post.getId(), userId);
+            sqsService.sendMessage("hstagramSqs", message);
+            System.out.println("SQS message sent for postId: " + post.getId());
+        } else {
+            System.out.println("Post not sent to SQS because follower count exceeds 10.");
+        }
     }
+
 
 
     // 게시글 업데이트 (내용 및 이미지 수정)
@@ -135,9 +142,13 @@ public class PostService {
                     .map(PostDTO::from)
                     .collect(Collectors.toList());
         }
-
-        // 2. postId를 기준으로 Redis에서 PostDTO 조회
+        // 2. celeb의 feed 조회하고 feed List에 추가
         List<PostDTO> feedList = new ArrayList<>();
+
+        List<Post> celebPosts = postRepository.findCelebPostsByUserId(userId, FOLLOWER_THRESHOLD);
+        feedList.addAll(celebPosts.stream().map(PostDTO::from).collect(Collectors.toList()));
+
+        // 3. postId를 기준으로 Redis에서 PostDTO 조회
         for (String postId : postIds) {
             String postKey = "post:" + postId;
             PostDTO postDTO = (PostDTO) redisTemplate.opsForValue().get(postKey);
@@ -166,5 +177,15 @@ public class PostService {
     // Elastic Search 기능 추가
     public List<PostDocument> searchPostsByKeyword(String keyword) {
         return elasticRepository.findByContentContaining(keyword);
+    }
+
+    /**
+     * MySQL Full-Text Search를 사용하여 키워드로 게시물을 검색합니다.
+     *
+     * @param keyword 검색 키워드
+     * @return 키워드와 일치하거나 관련된 게시물 목록
+     */
+    public List<PostDTO> searchPostsByFulltext(String keyword) {
+        return postRepository.searchByContent(keyword);
     }
 }
