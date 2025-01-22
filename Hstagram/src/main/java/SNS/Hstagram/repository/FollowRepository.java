@@ -2,6 +2,7 @@ package SNS.Hstagram.repository;
 
 import SNS.Hstagram.domain.Follow;
 import SNS.Hstagram.domain.FollowId;
+import SNS.Hstagram.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,4 +22,7 @@ public interface FollowRepository extends JpaRepository<Follow, FollowId> {
 
     @Query("SELECT f FROM Follow f WHERE f.follower.id = :userId")
     List<Follow> findFollowing(@Param("userId") Long userId);
+
+    @Query("SELECT COUNT(f) FROM Follow f WHERE f.following = :user")
+    long countFollowers(@Param("user") User user);
 }
