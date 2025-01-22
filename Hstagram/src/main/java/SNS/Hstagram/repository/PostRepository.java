@@ -29,4 +29,25 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                     ") ORDER BY p.createdAt DESC"
     )
     List<Post> findFeedPostsByUserId(@Param("userId") Long userId);
+
+    //full-text index
+    @Query(value = "SELECT p.id AS id, p.content AS content, p.image_url AS imageUrl " +
+            "FROM post p WHERE MATCH(p.content) AGAINST(:keyword IN NATURAL LANGUAGE MODE)", nativeQuery = true)
+    List<PostDTO> searchByContent(@Param("keyword") String keyword);
+
+    @Query("""
+    SELECT DISTINCT p 
+    FROM Post p 
+    JOIN FETCH p.user u 
+    WHERE u.id IN (
+        SELECT f.following.id 
+        FROM Follow f 
+        WHERE f.follower.id = :userId
+    )
+    AND (SELECT COUNT(f) FROM Follow f WHERE f.following.id = u.id) > :followThreshold
+    ORDER BY p.createdAt DESC
+    """)
+    List<Post> findCelebPostsByUserId(@Param("userId") Long userId, @Param("followThreshold") int followThreshold);
+
+
 }
