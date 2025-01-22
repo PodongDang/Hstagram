@@ -51,6 +51,10 @@ dependencies {
 	// Elasticsearch dependencies
 	implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 
+	//monitoring
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
 	testImplementation 'junit:junit:4.13.1'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.mysql:mysql-connector-j:8.0.33'
