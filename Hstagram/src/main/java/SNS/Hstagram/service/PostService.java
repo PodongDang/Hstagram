@@ -3,14 +3,17 @@ package SNS.Hstagram.service;
 import SNS.Hstagram.domain.Post;
 import SNS.Hstagram.domain.PostDocument;
 import SNS.Hstagram.domain.User;
+import SNS.Hstagram.dto.ElasticDTO;
 import SNS.Hstagram.dto.PostDTO;
+import SNS.Hstagram.dto.RedisDTO;
 import SNS.Hstagram.repository.ElasticRepository;
 import SNS.Hstagram.repository.FollowRepository;
 import SNS.Hstagram.repository.PostRepository;
 import SNS.Hstagram.repository.UserRepository;
-import SNS.Hstagram.service.SQS.SQSService;
+import SNS.Hstagram.service.kafka.KafkaService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +37,8 @@ public class PostService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisTemplate<String, String> postTemplate;
     private final S3Uploader s3Uploader;
-    private final SQSService sqsService;
+    //private final SQSService sqsService;
+    private final KafkaService kafkaService;
 
     private static final int FOLLOWER_THRESHOLD = 10; // 팔로워 수 기준
 
@@ -62,37 +66,39 @@ public class PostService {
         post.setContent(content);
 
         if (imageKey != null && !imageKey.isBlank()) {
-            // 예: "https://bucket-name.s3.amazonaws.com/{imageKey}"
             String fullUrl = s3Uploader.getS3ObjectUrl(imageKey);
             post.setImageUrl(fullUrl);
         }
 
         postRepository.save(post);
 
-        // Elasticsearch에 저장
-        PostDocument postDocument = new PostDocument();
-        postDocument.setId(post.getId());
-        postDocument.setUserId(userId);
-        postDocument.setContent(post.getContent());
-        postDocument.setImageUrl(post.getImageUrl());
-        postDocument.setLikeCount(post.getLikeCount());
-        postDocument.setCommentCount(post.getCommentCount());
-        postDocument.setPrivate(post.isPrivate());
-        postDocument.setCreatedAt(OffsetDateTime.now()); // Convert to UTC Instant
-        postDocument.setUpdatedAt(OffsetDateTime.now()); // Convert to UTC Instant
+        // ✅ Elasticsearch 저장 요청을 Kafka로 보냄
+        ElasticDTO elasticDTO = new ElasticDTO();
+        elasticDTO.setPostId(post.getId());
+        elasticDTO.setUserId(userId);
+        elasticDTO.setContent(post.getContent());
+        elasticDTO.setImageUrl(post.getImageUrl());
+        elasticDTO.setLikeCount(post.getLikeCount());
+        elasticDTO.setCommentCount(post.getCommentCount());
+        elasticDTO.setPrivate(post.isPrivate());
+        elasticDTO.setCreatedAt(OffsetDateTime.now());
+        elasticDTO.setUpdatedAt(OffsetDateTime.now());
 
-        elasticRepository.save(postDocument);
+        kafkaService.sendMessage("elasticsearch-topic", elasticDTO);
+        System.out.println("Kafka message sent for Elasticsearch storage");
 
-        // 팔로워 수 검사
+        // ✅ Redis 저장 요청은 FOLLOWER_THRESHOLD 이하일 때만 Kafka로 보냄
         if (followRepository.countFollowers(user) <= FOLLOWER_THRESHOLD) {
-            // SQS 메시지 전송
-            String message = String.format("{\"postId\":%d,\"userId\":%d}", post.getId(), userId);
-            sqsService.sendMessage("hstagramSqs", message);
-            System.out.println("SQS message sent for postId: " + post.getId());
-        } else {
-            System.out.println("Post not sent to SQS because follower count exceeds 10.");
+            RedisDTO redisDTO = new RedisDTO();
+            redisDTO.setPostId(post.getId());
+            redisDTO.setUserId(userId);
+
+            kafkaService.sendMessage("redis-topic", redisDTO);
+            System.out.println("Kafka message sent for Redis feed storage");
         }
     }
+
+
 
 
 
@@ -129,23 +135,27 @@ public class PostService {
     }
 
     // 피드 조회
-    public List<PostDTO> findUserFeedList(Long userId) {
+    public List<PostDTO> findUserFeedList(Long userId, int page, int size) {
         String feedKey = "feed:" + userId;
 
+        int start = page * size;
+        int end = start + size - 1;
+
         // 1. Redis에서 피드 목록 조회 (postId 목록)
-        List<String> postIds = postTemplate.opsForList().range(feedKey, 0, 99); //100개까지만 유지
+        List<String> postIds = postTemplate.opsForList().range(feedKey, start, end); //paging
 
         if (postIds == null || postIds.isEmpty()) {
             // Redis에 피드가 없으면 DB 조회
-            List<Post> posts = postRepository.findFeedPostsByUserId(userId);
+            List<Post> posts = postRepository.findFeedPostsByUserId(userId, PageRequest.of(page, size));
             return posts.stream()
                     .map(PostDTO::from)
                     .collect(Collectors.toList());
         }
+
         // 2. celeb의 feed 조회하고 feed List에 추가
         List<PostDTO> feedList = new ArrayList<>();
 
-        List<Post> celebPosts = postRepository.findCelebPostsByUserId(userId, FOLLOWER_THRESHOLD);
+        List<Post> celebPosts = postRepository.findCelebPostsByUserId(userId, FOLLOWER_THRESHOLD, PageRequest.of(page, size));
         feedList.addAll(celebPosts.stream().map(PostDTO::from).collect(Collectors.toList()));
 
         // 3. postId를 기준으로 Redis에서 PostDTO 조회
