@@ -2,6 +2,7 @@ package SNS.Hstagram.repository;
 
 import SNS.Hstagram.domain.Post;
 import SNS.Hstagram.dto.PostDTO;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -28,7 +29,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                     "  SELECT f.following.id FROM Follow f WHERE f.follower.id = :userId" +
                     ") ORDER BY p.createdAt DESC"
     )
-    List<Post> findFeedPostsByUserId(@Param("userId") Long userId);
+    List<Post> findFeedPostsByUserId(@Param("userId") Long userId, Pageable pageable);
 
     //full-text index
     @Query(value = "SELECT p.id AS id, p.content AS content, p.image_url AS imageUrl " +
@@ -47,7 +48,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     AND (SELECT COUNT(f) FROM Follow f WHERE f.following.id = u.id) > :followThreshold
     ORDER BY p.createdAt DESC
     """)
-    List<Post> findCelebPostsByUserId(@Param("userId") Long userId, @Param("followThreshold") int followThreshold);
+    List<Post> findCelebPostsByUserId(@Param("userId") Long userId, @Param("followThreshold") int followThreshold, Pageable pageable);
 
 
 }
