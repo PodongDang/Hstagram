@@ -83,7 +83,7 @@ public class PostController {
     @GetMapping("/feed")
     @Operation(summary = "피드 조회", description = "팔로우한 사용자의 게시글을 조회합니다.")
     public ResponseEntity<List<PostDTO>> getFeedList(@RequestParam Long userId) {
-        List<PostDTO> feedPosts = postService.findUserFeedList(userId);
+        List<PostDTO> feedPosts = postService.findUserFeedList(userId, 1, 10);
         return ResponseEntity.ok(feedPosts);
     }
 
