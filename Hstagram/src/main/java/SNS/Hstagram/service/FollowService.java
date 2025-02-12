@@ -10,6 +10,7 @@ import SNS.Hstagram.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +57,7 @@ public class FollowService {
         }
 
         // 팔로우 대상 게시글을 조회하여 피드 업데이트
-        updateUserFeed(followerId);
+        updateUserFeed(followerId, 1, 10);
     }
 
     // 언팔로우
@@ -66,13 +67,17 @@ public class FollowService {
         followRepository.delete(follow);
 
         // 언팔로우 이후 피드 업데이트
-        updateUserFeed(followerId);
+        updateUserFeed(followerId,1 ,10);
     }
 
     // Redis 피드 업데이트
-    private void updateUserFeed(Long userId) {
+    private void updateUserFeed(Long userId, int page, int size) {
+
+        int start = page * size;
+        int end = start + size - 1;
+
         // 팔로우한 사용자의 게시글 조회 (fetch join)
-        List<Post> posts = postRepository.findFeedPostsByUserId(userId);
+        List<Post> posts = postRepository.findFeedPostsByUserId(userId, PageRequest.of(page, size));
 
         // Redis에서 기존 피드 삭제
         String feedKey = "feed:" + userId;
@@ -85,7 +90,7 @@ public class FollowService {
 
         if (!postIds.isEmpty()) {
             redisLongTemplate.opsForList().leftPushAll(feedKey, postIds.toArray(new Long[0]));
-            redisLongTemplate.opsForList().trim(feedKey, 0, 99);  // 최신 100개 유지
+            redisLongTemplate.opsForList().trim(feedKey, start, end);  // 최신 100개 유지
         }
     }
 
