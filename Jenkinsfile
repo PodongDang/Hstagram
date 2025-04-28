@@ -24,11 +24,11 @@ pipeline {
             steps {
                 sh '''
                     cd Hstagram
+                    chmod +x gradlew
                     ./gradlew clean build -x test
                 '''
             }
         }
-
 
         stage('Docker Build & Push') {
             steps {
