@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        jdk ("jdk21")
-    }
-
     environment {
         GIT_URL = 'https://github.com/PodongDang/Hstagram.git'
         GIT_BRANCH = 'master' // 또는 master
