@@ -32,9 +32,9 @@ pipeline {
 
         stage('Docker Build & Push') {
             steps {
-                script { // with Registry가 paramater 3개를 받는다. 1, 2, 실행로직
+                script {
                     docker.withRegistry("https://${IMAGE_REGISTRY}", "${DOCKER_CREDENTIAL_ID}") {
-                        def appImage = docker.build("${IMAGE_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}", "--platform=linux/amd64 .")
+                        def appImage = docker.build("${IMAGE_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}", "--platform=linux/amd64 Hstagram")
                         appImage.push()
                     }
                 }
