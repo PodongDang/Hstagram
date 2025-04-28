@@ -1,0 +1,45 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sk030-my-app
+  namespace: skala-practice
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: public-nginx
+  rules:
+    - host: springboot.skala25a.project.skala-ai.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: sk030-my-app
+                port:
+                  number: 8080
+          - path: /actuator
+            pathType: Prefix
+            backend:
+              service:
+                name: sk030-my-app
+                port:
+                  number: 8081
+          - path: /swagger
+            pathType: Prefix
+            backend:
+              service:
+                name: sk030-my-app
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sk030-my-app
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - '*.skala25a.project.skala-ai.com'
+      secretName: skala25-project-tls-cert
