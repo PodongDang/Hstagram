@@ -22,9 +22,13 @@ pipeline {
 
         stage('Build with Gradle') {
             steps {
-                sh './gradlew clean build -x test'
+                sh '''
+                    cd Hstagram
+                    ./gradlew clean build -x test
+                '''
             }
         }
+
 
         stage('Docker Build & Push') {
             steps {
