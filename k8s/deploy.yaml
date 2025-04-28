@@ -18,12 +18,22 @@ spec:
         app: sk030-my-app
     spec:
       serviceAccountName: default
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: control-plane
+                    operator: In
+                    values:
+                      - "amdp"
       containers:
-        - name: sk030-my-app
+        - name: my-app
           image: amdp-registry.skala-ai.com/skala25a/sk030-my-app:1.0.0
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
+            - containerPort: 8081
           env:
             - name: LOGGING_LEVEL
               value: DEBUG
@@ -31,3 +41,8 @@ spec:
               value: sk030
             - name: NAMESPACE
               value: skala-practice
+      tolerations:
+        - key: control-plane
+          operator: Equal
+          value: "amdp"
+          effect: NoSchedule
