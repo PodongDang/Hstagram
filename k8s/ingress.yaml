@@ -11,7 +11,7 @@ spec:
     - host: springboot.skala25a.project.skala-ai.com
       http:
         paths:
-          - path: /api
+          - path: /api030
             pathType: Prefix
             backend:
               service:
