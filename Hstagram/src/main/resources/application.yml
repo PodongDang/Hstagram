@@ -1,0 +1,67 @@
+server:
+  port: ${SERVER_PORT:30000}
+  address: 0.0.0.0
+  servlet:
+    session:
+      cookie:
+        name: JSESSIONID
+
+spring:
+  application:
+    name: producer_application
+
+  kafka:
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    topic:
+      name: ${KAFKA_TOPIC_NAME}
+
+  profiles:
+    active: aws
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+    elasticsearch:
+      index:
+        create-on-startup: false
+      repositories:
+        enabled: true
+      schema-management:
+        enabled: false
+      client:
+        reactive:
+          endpoints: ${ES_ENDPOINT}
+      username: ${ES_USERNAME}
+      password: ${ES_PASSWORD}
+      certificate: ${ES_CERTIFICATE_PATH}
+      url: ${ES_ENDPOINT}
+      ssl:
+        trust-store: ${ES_TRUSTSTORE_PATH}
+        trust-store-password: ${ES_TRUSTSTORE_PASSWORD}
+
+  session:
+    store-type: redis
+    timeout: 30m
+    redis:
+      namespace: spring:session
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type: trace
