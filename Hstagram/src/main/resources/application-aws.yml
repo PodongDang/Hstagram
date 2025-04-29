@@ -1,0 +1,16 @@
+aws:
+  s3:
+    bucket: ${AWS_S3_BUCKET}
+    region: ${AWS_REGION}
+  sqs:
+    queue:
+      name: ${AWS_SQS_QUEUE_NAME}
+      url: ${AWS_SQS_QUEUE_URL}
+    region: ${AWS_REGION}
+    enabled: false
+  credentials:
+    accessKey: ${AWS_ACCESS_KEY}
+    secretKey: ${AWS_SECRET_KEY}
+
+stack:
+  auto: false
